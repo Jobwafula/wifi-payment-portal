@@ -8,9 +8,18 @@ const Sidebar: React.FC = () => {
         <h1 className="text-2xl font-bold text-green-500">Wifi Hotspot Manager</h1>
         <nav className="mt-8">
           <ul className="space-y-2">
+            {/* Home Link */}
             <li>
-             
+              <Link
+                to="/dashboard"
+                className="flex items-center px-4 py-2 text-gray-300 hover:bg-green-700 rounded-md transition duration-300"
+              >
+                <span className="mr-2">🏠</span>
+                Home
+              </Link>
             </li>
+
+            {/* Users Link */}
             <li>
               <Link
                 to="/dashboard/users"
@@ -20,6 +29,8 @@ const Sidebar: React.FC = () => {
                 Users
               </Link>
             </li>
+
+            {/* Payments Link */}
             <li>
               <Link
                 to="/dashboard/payments"
@@ -29,6 +40,8 @@ const Sidebar: React.FC = () => {
                 Payments
               </Link>
             </li>
+
+            {/* Devices Link */}
             <li>
               <Link
                 to="/dashboard/devices"
@@ -38,6 +51,8 @@ const Sidebar: React.FC = () => {
                 Devices
               </Link>
             </li>
+
+            {/* Analytics Link */}
             <li>
               <Link
                 to="/dashboard/analytics"
@@ -47,6 +62,8 @@ const Sidebar: React.FC = () => {
                 Analytics
               </Link>
             </li>
+
+            {/* Settings Link */}
             <li>
               <Link
                 to="/dashboard/settings"
@@ -56,6 +73,8 @@ const Sidebar: React.FC = () => {
                 Settings
               </Link>
             </li>
+
+            {/* Logs Link */}
             <li>
               <Link
                 to="/dashboard/logs"
@@ -65,6 +84,8 @@ const Sidebar: React.FC = () => {
                 Logs
               </Link>
             </li>
+
+            {/* Support Link */}
             <li>
               <Link
                 to="/dashboard/support"
