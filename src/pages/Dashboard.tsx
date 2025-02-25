@@ -4,6 +4,10 @@ import Sidebar from "../components/layout/Sidebar";
 import Users from "../components/users/Users";
 import Payments from "../components/payments/Payments";
 import Analytics from "../components/analytics/Analytics";
+import Devices from "../components/devices/Devices";
+import Settings from "../components/settings/Settings";
+import Logs from "../components/logs/Logs";
+import Support from "../components/support/Support";
 
 const Dashboard: React.FC = () => {
   return (
@@ -14,6 +18,10 @@ const Dashboard: React.FC = () => {
           <Route path="/users" element={<Users />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/devices" element={<Devices />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/logs" element={<Logs />} />
+          <Route path="/support" element={<Support />} />
         </Routes>
       </div>
     </div>
