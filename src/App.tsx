@@ -9,6 +9,7 @@ import CaptivePortal from "./pages/Captiveportal";
 import PricingDetail from "./pages/PricingDetail";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLayout from "./components/layout/AdminLayout";
+import TenantDashboard from "./pages/TenantDashboard";
 
 const App: React.FC = () => {
   return (
@@ -18,7 +19,8 @@ const App: React.FC = () => {
         <Route path='/home' element={<Home />} />
         <Route path='/contact' element={<ContactPage />} />
         <Route path="/sign-up" element={<SignUpPage />}  />
-        <Route path="/dashboard/*" element={<Dashboard />} />
+        <Route path="/tenant-dashboard" element={<TenantDashboard />} />
+
         <Route path="/captive-portal" element={<CaptivePortal />}
         />
         <Route path="/pricing/:plan" element={<PricingDetail />}
