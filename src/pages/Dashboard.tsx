@@ -6,7 +6,6 @@ import Payments from "../components/payments/Payments";
 import Analytics from "../components/analytics/Analytics";
 import Devices from "../components/devices/Devices";
 import Settings from "../components/settings/Settings";
-import Logs from "../components/logs/Logs";
 import Support from "../components/support/Support";
 import Home from "../components/home/Home"; // Import the Home component
 
