@@ -7,6 +7,8 @@ import ContactPage from "./pages/ContactPage";
 import SignUpPage from "./pages/SignupPage";
 import CaptivePortal from "./pages/Captiveportal";
 import PricingDetail from "./pages/PricingDetail";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminLayout from "./components/layout/AdminLayout";
 
 const App: React.FC = () => {
   return (
@@ -19,7 +21,14 @@ const App: React.FC = () => {
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="/captive-portal" element={<CaptivePortal />}
         />
-        <Route path="/pricing/:plan" element={<PricingDetail />} />
+        <Route path="/pricing/:plan" element={<PricingDetail />}
+         />
+         <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="tenants" element={<AdminDashboard />} />
+          <Route path="transactions" element={<AdminDashboard />} />
+          <Route path="settings" element={<AdminDashboard />} />
+        </Route>
       </Routes>
     </Router>
   );
