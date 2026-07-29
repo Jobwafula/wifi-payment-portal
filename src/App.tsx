@@ -6,6 +6,7 @@ import LandingPage from "./pages/LandingPage";
 import ContactPage from "./pages/ContactPage";
 import SignUpPage from "./pages/SignupPage";
 import CaptivePortal from "./pages/Captiveportal";
+import PricingDetail from "./pages/PricingDetail";
 
 const App: React.FC = () => {
   return (
@@ -16,7 +17,9 @@ const App: React.FC = () => {
         <Route path='/contact' element={<ContactPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
-        <Route path="/captive-portal" element={<CaptivePortal />}/>
+        <Route path="/captive-portal" element={<CaptivePortal />}
+        />
+        <Route path="/pricing/:plan" element={<PricingDetail />} />
       </Routes>
     </Router>
   );

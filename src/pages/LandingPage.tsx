@@ -1,10 +1,15 @@
 import React from "react";
 import Navbar from "../layout/Navbar";
 import Footer from "../layout/Footer";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const LandingPage: React.FC = () => {
-    const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const handlePricingClick = (plan: string) => {
+    navigate(`/pricing/${plan.toLowerCase()}`);
+  };
+
   return (
     <div className="font-sans antialiased">
       <Navbar />
@@ -21,7 +26,7 @@ const LandingPage: React.FC = () => {
                 Empower your Wi-Fi ecosystem with cutting-edge user management, seamless payments, and actionable analytics.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up animation-delay-400">
-                <button onClick={()=>navigate('/sign-up')} className="bg-white text-green-700 px-6 py-3 rounded-full font-semibold text-base md:text-lg shadow-lg hover:bg-indigo-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-auto">
+                <button onClick={() => navigate('/sign-up')} className="bg-white text-green-700 px-6 py-3 rounded-full font-semibold text-base md:text-lg shadow-lg hover:bg-indigo-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-auto">
                   Start Free Trial
                 </button>
                 <button className="border-2 border-white text-white px-6 py-3 rounded-full font-semibold text-base md:text-lg hover:bg-white hover:text-green-700 transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-auto">
@@ -76,7 +81,10 @@ const LandingPage: React.FC = () => {
                 <h3 className="text-xl md:text-2xl font-semibold mb-4 text-gray-800">Starter</h3>
                 <p className="text-gray-600 mb-6 text-sm md:text-base">Ideal for small networks</p>
                 <p className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">K sh 1,500 <span className="text-lg md:text-xl text-gray-500">/mo</span></p>
-                <button className="bg-green-600 text-white px-6 md:px-8 py-3 rounded-full font-semibold hover:bg-green-700 transition-all duration-300 w-full">
+                <button 
+                  onClick={() => handlePricingClick('starter')}
+                  className="bg-green-600 text-white px-6 md:px-8 py-3 rounded-full font-semibold hover:bg-green-700 transition-all duration-300 w-full"
+                >
                   Get Started
                 </button>
               </div>
@@ -85,7 +93,10 @@ const LandingPage: React.FC = () => {
                 <h3 className="text-xl md:text-2xl font-semibold mb-4 text-gray-800">Pro</h3>
                 <p className="text-gray-600 mb-6 text-sm md:text-base">Perfect for growing networks</p>
                 <p className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">K sh 4,500<span className="text-lg md:text-xl text-gray-500">/mo</span></p>
-                <button className="bg-green-600 text-white px-6 md:px-8 py-3 rounded-full font-semibold hover:bg-green-700 transition-all duration-300 w-full">
+                <button 
+                  onClick={() => handlePricingClick('pro')}
+                  className="bg-green-600 text-white px-6 md:px-8 py-3 rounded-full font-semibold hover:bg-green-700 transition-all duration-300 w-full"
+                >
                   Get Started
                 </button>
               </div>
@@ -93,7 +104,10 @@ const LandingPage: React.FC = () => {
                 <h3 className="text-xl md:text-2xl font-semibold mb-4 text-gray-800">Enterprise</h3>
                 <p className="text-gray-600 mb-6 text-sm md:text-base">Built for large-scale networks</p>
                 <p className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">K sh 5,500<span className="text-lg md:text-xl text-gray-500">/mo</span></p>
-                <button className="bg-green-600 text-white px-6 md:px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition-all duration-300 w-full">
+                <button 
+                  onClick={() => handlePricingClick('enterprise')}
+                  className="bg-green-600 text-white px-6 md:px-8 py-3 rounded-full font-semibold hover:bg-green-700 transition-all duration-300 w-full"
+                >
                   Get Started
                 </button>
               </div>
