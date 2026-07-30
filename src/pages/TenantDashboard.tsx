@@ -1,4 +1,4 @@
-// TenantDashboard.tsx
+// TenantDashboard.tsx - Updated with Hourly Plans
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -28,10 +28,11 @@ interface Package {
   name: string;
   description: string;
   price: number;
-  duration: string; // "daily", "weekly", "monthly", "custom"
+  duration: "hourly" | "daily" | "weekly" | "monthly" | "custom";
+  durationHours: number;
   durationDays: number;
-  dataLimit: string; // "Unlimited" or "5GB", "10GB", etc.
-  speedLimit: string; // "1Mbps", "5Mbps", "Unlimited"
+  dataLimit: string;
+  speedLimit: string;
   isActive: boolean;
   isPopular?: boolean;
   features: string[];
@@ -66,37 +67,68 @@ const TenantDashboard: React.FC = () => {
   const [packages, setPackages] = useState<Package[]>([
     {
       id: "1",
-      name: "Daily Pass",
-      description: "Perfect for visitors and short-term users",
-      price: 200,
-      duration: "daily",
-      durationDays: 1,
-      dataLimit: "1GB",
+      name: "1-Hour Pass",
+      description: "Perfect for quick errands and short visits",
+      price: 50,
+      duration: "hourly",
+      durationHours: 1,
+      durationDays: 0.04,
+      dataLimit: "500MB",
       speedLimit: "2Mbps",
       isActive: true,
-      features: ["1GB Data", "2Mbps Speed", "24-hour access"],
+      features: ["500MB Data", "2Mbps Speed", "1-hour access"],
       createdAt: "2024-01-01",
     },
     {
       id: "2",
-      name: "Weekly Plan",
-      description: "Great for weekly stays and short-term needs",
-      price: 500,
-      duration: "weekly",
-      durationDays: 7,
-      dataLimit: "5GB",
-      speedLimit: "5Mbps",
+      name: "3-Hour Pass",
+      description: "Great for meetings and extended visits",
+      price: 100,
+      duration: "hourly",
+      durationHours: 3,
+      durationDays: 0.125,
+      dataLimit: "1.5GB",
+      speedLimit: "3Mbps",
       isActive: true,
       isPopular: true,
-      features: ["5GB Data", "5Mbps Speed", "7-day access", "Priority support"],
+      features: ["1.5GB Data", "3Mbps Speed", "3-hour access", "Priority support"],
       createdAt: "2024-01-01",
     },
     {
       id: "3",
+      name: "Daily Pass",
+      description: "Perfect for visitors and short-term users",
+      price: 200,
+      duration: "daily",
+      durationHours: 24,
+      durationDays: 1,
+      dataLimit: "2GB",
+      speedLimit: "4Mbps",
+      isActive: true,
+      features: ["2GB Data", "4Mbps Speed", "24-hour access"],
+      createdAt: "2024-01-01",
+    },
+    {
+      id: "4",
+      name: "Weekly Plan",
+      description: "Great for weekly stays and short-term needs",
+      price: 500,
+      duration: "weekly",
+      durationHours: 168,
+      durationDays: 7,
+      dataLimit: "10GB",
+      speedLimit: "5Mbps",
+      isActive: true,
+      features: ["10GB Data", "5Mbps Speed", "7-day access", "Priority support"],
+      createdAt: "2024-01-01",
+    },
+    {
+      id: "5",
       name: "Monthly Premium",
       description: "Best value for regular users",
       price: 1500,
       duration: "monthly",
+      durationHours: 720,
       durationDays: 30,
       dataLimit: "Unlimited",
       speedLimit: "10Mbps",
@@ -105,16 +137,17 @@ const TenantDashboard: React.FC = () => {
       createdAt: "2024-01-01",
     },
     {
-      id: "4",
-      name: "Student Plan",
-      description: "Special plan for students",
-      price: 800,
-      duration: "monthly",
-      durationDays: 30,
-      dataLimit: "10GB",
-      speedLimit: "3Mbps",
+      id: "6",
+      name: "6-Hour Night Pass",
+      description: "Special night-time browsing package",
+      price: 80,
+      duration: "hourly",
+      durationHours: 6,
+      durationDays: 0.25,
+      dataLimit: "3GB",
+      speedLimit: "5Mbps",
       isActive: true,
-      features: ["10GB Data", "3Mbps Speed", "30-day access", "Student discount"],
+      features: ["3GB Data", "5Mbps Speed", "6-hour access", "Night-time special"],
       createdAt: "2024-02-01",
     },
   ]);
@@ -136,33 +169,33 @@ const TenantDashboard: React.FC = () => {
       name: "Sarah Wanjiru",
       email: "sarah.wanjiru@email.com",
       phone: "+254 723 456 789",
-      plan: "Weekly Plan",
+      plan: "3-Hour Pass",
       status: "active",
-      dataUsed: "8.2 GB",
+      dataUsed: "1.2 GB",
       joinedDate: "2024-03-01",
-      expiryDate: "2024-03-08",
+      expiryDate: "2024-03-01 14:30",
     },
     {
       id: "3",
       name: "Peter Ochieng",
       email: "peter.ochieng@email.com",
       phone: "+254 734 567 890",
-      plan: "Monthly Premium",
-      status: "inactive",
-      dataUsed: "3.1 GB",
-      joinedDate: "2023-12-01",
-      expiryDate: "2024-01-01",
+      plan: "Daily Pass",
+      status: "active",
+      dataUsed: "1.8 GB",
+      joinedDate: "2024-03-01",
+      expiryDate: "2024-03-02",
     },
     {
       id: "4",
       name: "Mary Akinyi",
       email: "mary.akinyi@email.com",
       phone: "+254 745 678 901",
-      plan: "Daily Pass",
+      plan: "1-Hour Pass",
       status: "expired",
-      dataUsed: "2.8 GB",
-      joinedDate: "2024-03-05",
-      expiryDate: "2024-03-06",
+      dataUsed: "0.3 GB",
+      joinedDate: "2024-03-05 10:00",
+      expiryDate: "2024-03-05 11:00",
     },
   ]);
 
@@ -178,7 +211,7 @@ const TenantDashboard: React.FC = () => {
     {
       id: "2",
       customer: "Sarah Wanjiru",
-      amount: 500,
+      amount: 100,
       type: "payment",
       status: "completed",
       date: "2024-03-14",
@@ -186,15 +219,15 @@ const TenantDashboard: React.FC = () => {
     {
       id: "3",
       customer: "Peter Ochieng",
-      amount: 1500,
+      amount: 200,
       type: "payment",
-      status: "pending",
+      status: "completed",
       date: "2024-03-13",
     },
     {
       id: "4",
       customer: "Mary Akinyi",
-      amount: 200,
+      amount: 50,
       type: "payment",
       status: "failed",
       date: "2024-03-12",
@@ -205,9 +238,10 @@ const TenantDashboard: React.FC = () => {
     name: "",
     description: "",
     price: 0,
-    duration: "daily",
-    durationDays: 1,
-    dataLimit: "1GB",
+    duration: "hourly",
+    durationHours: 1,
+    durationDays: 0.04,
+    dataLimit: "500MB",
     speedLimit: "2Mbps",
     isActive: true,
     isPopular: false,
@@ -251,6 +285,34 @@ const TenantDashboard: React.FC = () => {
     }).format(amount);
   };
 
+  const formatDuration = (pkg: Package) => {
+    if (pkg.duration === "hourly") {
+      return `${pkg.durationHours} hour${pkg.durationHours > 1 ? 's' : ''}`;
+    } else if (pkg.duration === "daily") {
+      return `${pkg.durationDays} day${pkg.durationDays > 1 ? 's' : ''}`;
+    } else if (pkg.duration === "weekly") {
+      return `${pkg.durationDays / 7} week${pkg.durationDays / 7 > 1 ? 's' : ''}`;
+    } else if (pkg.duration === "monthly") {
+      return `${pkg.durationDays / 30} month${pkg.durationDays / 30 > 1 ? 's' : ''}`;
+    }
+    return `${pkg.durationDays} days`;
+  };
+
+  const getDurationBadgeColor = (duration: string) => {
+    switch (duration) {
+      case "hourly":
+        return "bg-purple-100 text-purple-800";
+      case "daily":
+        return "bg-blue-100 text-blue-800";
+      case "weekly":
+        return "bg-green-100 text-green-800";
+      case "monthly":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   // Package Management Functions
   const handleAddPackage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -261,19 +323,7 @@ const TenantDashboard: React.FC = () => {
     };
     setPackages([...packages, packageData]);
     setShowAddPackage(false);
-    setNewPackage({
-      name: "",
-      description: "",
-      price: 0,
-      duration: "daily",
-      durationDays: 1,
-      dataLimit: "1GB",
-      speedLimit: "2Mbps",
-      isActive: true,
-      isPopular: false,
-      features: [],
-    });
-    setFeatureInput("");
+    resetPackageForm();
   };
 
   const handleEditPackage = (pkg: Package) => {
@@ -283,11 +333,12 @@ const TenantDashboard: React.FC = () => {
       description: pkg.description,
       price: pkg.price,
       duration: pkg.duration,
+      durationHours: pkg.durationHours,
       durationDays: pkg.durationDays,
       dataLimit: pkg.dataLimit,
       speedLimit: pkg.speedLimit,
       isActive: pkg.isActive,
-      isPopular: pkg.isPopular,
+      isPopular: pkg.isPopular || false,
       features: pkg.features,
     });
     setShowAddPackage(true);
@@ -305,19 +356,7 @@ const TenantDashboard: React.FC = () => {
     setPackages(updatedPackages);
     setShowAddPackage(false);
     setEditingPackage(null);
-    setNewPackage({
-      name: "",
-      description: "",
-      price: 0,
-      duration: "daily",
-      durationDays: 1,
-      dataLimit: "1GB",
-      speedLimit: "2Mbps",
-      isActive: true,
-      isPopular: false,
-      features: [],
-    });
-    setFeatureInput("");
+    resetPackageForm();
   };
 
   const handleDeletePackage = (id: string) => {
@@ -330,6 +369,23 @@ const TenantDashboard: React.FC = () => {
     setPackages(packages.map(pkg =>
       pkg.id === id ? { ...pkg, isActive: !pkg.isActive } : pkg
     ));
+  };
+
+  const resetPackageForm = () => {
+    setNewPackage({
+      name: "",
+      description: "",
+      price: 0,
+      duration: "hourly",
+      durationHours: 1,
+      durationDays: 0.04,
+      dataLimit: "500MB",
+      speedLimit: "2Mbps",
+      isActive: true,
+      isPopular: false,
+      features: [],
+    });
+    setFeatureInput("");
   };
 
   const addFeature = () => {
@@ -349,9 +405,44 @@ const TenantDashboard: React.FC = () => {
     });
   };
 
+  const handleDurationChange = (duration: string) => {
+    let durationHours = 1;
+    let durationDays = 0.04;
+    
+    switch (duration) {
+      case "hourly":
+        durationHours = 1;
+        durationDays = 0.04;
+        break;
+      case "daily":
+        durationHours = 24;
+        durationDays = 1;
+        break;
+      case "weekly":
+        durationHours = 168;
+        durationDays = 7;
+        break;
+      case "monthly":
+        durationHours = 720;
+        durationDays = 30;
+        break;
+      case "custom":
+        durationHours = 1;
+        durationDays = 1;
+        break;
+    }
+    
+    setNewPackage({
+      ...newPackage,
+      duration: duration as any,
+      durationHours,
+      durationDays,
+    });
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar - Same as before */}
+      {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? "w-64" : "w-20"
@@ -505,7 +596,7 @@ const TenantDashboard: React.FC = () => {
         </header>
 
         <div className="p-6">
-          {/* Overview Tab - Same as before */}
+          {/* Overview Tab */}
           {activeTab === "overview" && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -661,7 +752,7 @@ const TenantDashboard: React.FC = () => {
             </>
           )}
 
-          {/* Packages Tab - NEW */}
+          {/* Packages Tab - Updated with Hourly Plans */}
           {activeTab === "packages" && (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -672,24 +763,34 @@ const TenantDashboard: React.FC = () => {
                 <button 
                   onClick={() => {
                     setEditingPackage(null);
-                    setNewPackage({
-                      name: "",
-                      description: "",
-                      price: 0,
-                      duration: "daily",
-                      durationDays: 1,
-                      dataLimit: "1GB",
-                      speedLimit: "2Mbps",
-                      isActive: true,
-                      isPopular: false,
-                      features: [],
-                    });
-                    setFeatureInput("");
+                    resetPackageForm();
                     setShowAddPackage(true);
                   }}
                   className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                 >
                   + New Package
+                </button>
+              </div>
+
+              {/* Duration Filters */}
+              <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                <button className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium">
+                  All
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                  Hourly
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                  Daily
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                  Weekly
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                  Monthly
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                  Custom
                 </button>
               </div>
 
@@ -717,17 +818,22 @@ const TenantDashboard: React.FC = () => {
                     <div className="mb-4">
                       <span className="text-3xl font-bold text-gray-800">{formatCurrency(pkg.price)}</span>
                       <span className="text-gray-500 text-sm ml-1">
-                        / {pkg.duration}
+                        / {formatDuration(pkg)}
                       </span>
                     </div>
 
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      <span className={`px-2 py-1 rounded-full text-xs ${getDurationBadgeColor(pkg.duration)}`}>
+                        {pkg.duration.charAt(0).toUpperCase() + pkg.duration.slice(1)}
+                      </span>
+                      {pkg.duration === "hourly" && (
+                        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
+                          {pkg.durationHours}h access
+                        </span>
+                      )}
+                    </div>
+
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span>{pkg.durationDays} days access</span>
-                      </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
@@ -795,7 +901,7 @@ const TenantDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Subscribers Tab - Same as before with minor updates */}
+          {/* Subscribers Tab */}
           {activeTab === "subscribers" && (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -874,7 +980,7 @@ const TenantDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Transactions Tab - Same as before */}
+          {/* Transactions Tab */}
           {activeTab === "transactions" && (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -936,7 +1042,7 @@ const TenantDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Router Tab - Same as before */}
+          {/* Router Tab */}
           {activeTab === "router" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white rounded-xl shadow-sm p-6">
@@ -1000,7 +1106,7 @@ const TenantDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Settings Tab - Same as before */}
+          {/* Settings Tab */}
           {activeTab === "settings" && (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-6">Business Settings</h2>
@@ -1055,7 +1161,7 @@ const TenantDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Add/Edit Package Modal */}
+      {/* Add/Edit Package Modal - Updated with Hourly Support */}
       {showAddPackage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
           <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 my-8">
@@ -1067,6 +1173,7 @@ const TenantDashboard: React.FC = () => {
                 onClick={() => {
                   setShowAddPackage(false);
                   setEditingPackage(null);
+                  resetPackageForm();
                 }}
                 className="text-gray-500 hover:text-gray-700"
               >
@@ -1085,7 +1192,7 @@ const TenantDashboard: React.FC = () => {
                     value={newPackage.name}
                     onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="e.g., Premium Monthly"
+                    placeholder="e.g., 1-Hour Pass"
                     required
                   />
                 </div>
@@ -1096,7 +1203,7 @@ const TenantDashboard: React.FC = () => {
                     value={newPackage.price}
                     onChange={(e) => setNewPackage({ ...newPackage, price: parseFloat(e.target.value) })}
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="1500"
+                    placeholder="50"
                     required
                     min="0"
                   />
@@ -1116,16 +1223,13 @@ const TenantDashboard: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Duration</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Duration Type</label>
                   <select
                     value={newPackage.duration}
-                    onChange={(e) => {
-                      const duration = e.target.value;
-                      const durationDays = duration === "daily" ? 1 : duration === "weekly" ? 7 : duration === "monthly" ? 30 : 1;
-                      setNewPackage({ ...newPackage, duration, durationDays });
-                    }}
+                    onChange={(e) => handleDurationChange(e.target.value)}
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
+                    <option value="hourly">Hourly</option>
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
@@ -1133,14 +1237,24 @@ const TenantDashboard: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Duration (Days)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {newPackage.duration === "hourly" ? "Hours" : "Duration (Days)"}
+                  </label>
                   <input
                     type="number"
-                    value={newPackage.durationDays}
-                    onChange={(e) => setNewPackage({ ...newPackage, durationDays: parseInt(e.target.value) })}
+                    value={newPackage.duration === "hourly" ? newPackage.durationHours : newPackage.durationDays}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      if (newPackage.duration === "hourly") {
+                        setNewPackage({ ...newPackage, durationHours: value, durationDays: value / 24 });
+                      } else {
+                        setNewPackage({ ...newPackage, durationDays: value, durationHours: value * 24 });
+                      }
+                    }}
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="30"
-                    min="1"
+                    placeholder={newPackage.duration === "hourly" ? "1" : "1"}
+                    min={newPackage.duration === "hourly" ? 1 : 1}
+                    step={newPackage.duration === "hourly" ? 1 : 1}
                     required
                   />
                 </div>
@@ -1225,8 +1339,7 @@ const TenantDashboard: React.FC = () => {
                   <span className="text-sm text-gray-700">Active</span>
                 </label>
                 <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
+                  <input                    type="checkbox"
                     checked={newPackage.isPopular}
                     onChange={(e) => setNewPackage({ ...newPackage, isPopular: e.target.checked })}
                     className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
@@ -1241,6 +1354,7 @@ const TenantDashboard: React.FC = () => {
                   onClick={() => {
                     setShowAddPackage(false);
                     setEditingPackage(null);
+                    resetPackageForm();
                   }}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -1258,7 +1372,7 @@ const TenantDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Add Subscriber Modal */}
+      {/* Add Subscriber Modal - Updated with Hourly Packages */}
       {showAddSubscriber && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
@@ -1289,11 +1403,34 @@ const TenantDashboard: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Package</label>
                 <select className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                  {packages.filter(p => p.isActive).map((pkg) => (
-                    <option key={pkg.id} value={pkg.id}>
-                      {pkg.name} - {formatCurrency(pkg.price)}
-                    </option>
-                  ))}
+                  <optgroup label="Hourly Plans">
+                    {packages.filter(p => p.isActive && p.duration === "hourly").map((pkg) => (
+                      <option key={pkg.id} value={pkg.id}>
+                        {pkg.name} - {formatCurrency(pkg.price)} ({pkg.durationHours}h)
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Daily Plans">
+                    {packages.filter(p => p.isActive && p.duration === "daily").map((pkg) => (
+                      <option key={pkg.id} value={pkg.id}>
+                        {pkg.name} - {formatCurrency(pkg.price)}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Weekly Plans">
+                    {packages.filter(p => p.isActive && p.duration === "weekly").map((pkg) => (
+                      <option key={pkg.id} value={pkg.id}>
+                        {pkg.name} - {formatCurrency(pkg.price)}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Monthly Plans">
+                    {packages.filter(p => p.isActive && p.duration === "monthly").map((pkg) => (
+                      <option key={pkg.id} value={pkg.id}>
+                        {pkg.name} - {formatCurrency(pkg.price)}
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
               <div className="flex gap-3">
