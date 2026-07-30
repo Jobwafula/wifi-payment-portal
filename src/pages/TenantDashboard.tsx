@@ -23,6 +23,21 @@ interface Transaction {
   date: string;
 }
 
+interface Package {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration: string; // "daily", "weekly", "monthly", "custom"
+  durationDays: number;
+  dataLimit: string; // "Unlimited" or "5GB", "10GB", etc.
+  speedLimit: string; // "1Mbps", "5Mbps", "Unlimited"
+  isActive: boolean;
+  isPopular?: boolean;
+  features: string[];
+  createdAt: string;
+}
+
 interface DashboardStats {
   totalSubscribers: number;
   activeSubscribers: number;
@@ -36,6 +51,8 @@ const TenantDashboard: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [showAddSubscriber, setShowAddSubscriber] = useState(false);
+  const [showAddPackage, setShowAddPackage] = useState(false);
+  const [editingPackage, setEditingPackage] = useState<Package | null>(null);
   
   // Mock data - replace with actual API calls
   const [stats, setStats] = useState<DashboardStats>({
@@ -46,13 +63,69 @@ const TenantDashboard: React.FC = () => {
     pendingPayments: 12,
   });
 
+  const [packages, setPackages] = useState<Package[]>([
+    {
+      id: "1",
+      name: "Daily Pass",
+      description: "Perfect for visitors and short-term users",
+      price: 200,
+      duration: "daily",
+      durationDays: 1,
+      dataLimit: "1GB",
+      speedLimit: "2Mbps",
+      isActive: true,
+      features: ["1GB Data", "2Mbps Speed", "24-hour access"],
+      createdAt: "2024-01-01",
+    },
+    {
+      id: "2",
+      name: "Weekly Plan",
+      description: "Great for weekly stays and short-term needs",
+      price: 500,
+      duration: "weekly",
+      durationDays: 7,
+      dataLimit: "5GB",
+      speedLimit: "5Mbps",
+      isActive: true,
+      isPopular: true,
+      features: ["5GB Data", "5Mbps Speed", "7-day access", "Priority support"],
+      createdAt: "2024-01-01",
+    },
+    {
+      id: "3",
+      name: "Monthly Premium",
+      description: "Best value for regular users",
+      price: 1500,
+      duration: "monthly",
+      durationDays: 30,
+      dataLimit: "Unlimited",
+      speedLimit: "10Mbps",
+      isActive: true,
+      features: ["Unlimited Data", "10Mbps Speed", "30-day access", "Priority support", "Free setup"],
+      createdAt: "2024-01-01",
+    },
+    {
+      id: "4",
+      name: "Student Plan",
+      description: "Special plan for students",
+      price: 800,
+      duration: "monthly",
+      durationDays: 30,
+      dataLimit: "10GB",
+      speedLimit: "3Mbps",
+      isActive: true,
+      features: ["10GB Data", "3Mbps Speed", "30-day access", "Student discount"],
+      createdAt: "2024-02-01",
+    },
+  ]);
+
   const [subscribers, setSubscribers] = useState<Subscriber[]>([
     {
       id: "1",
       name: "John Mwangi",
       email: "john.mwangi@email.com",
       phone: "+254 712 345 678",
-      plan: "Monthly",
+      plan: "Monthly Premium",
       status: "active",
       dataUsed: "12.5 GB",
       joinedDate: "2024-01-15",
@@ -63,7 +136,7 @@ const TenantDashboard: React.FC = () => {
       name: "Sarah Wanjiru",
       email: "sarah.wanjiru@email.com",
       phone: "+254 723 456 789",
-      plan: "Weekly",
+      plan: "Weekly Plan",
       status: "active",
       dataUsed: "8.2 GB",
       joinedDate: "2024-03-01",
@@ -74,7 +147,7 @@ const TenantDashboard: React.FC = () => {
       name: "Peter Ochieng",
       email: "peter.ochieng@email.com",
       phone: "+254 734 567 890",
-      plan: "Monthly",
+      plan: "Monthly Premium",
       status: "inactive",
       dataUsed: "3.1 GB",
       joinedDate: "2023-12-01",
@@ -85,7 +158,7 @@ const TenantDashboard: React.FC = () => {
       name: "Mary Akinyi",
       email: "mary.akinyi@email.com",
       phone: "+254 745 678 901",
-      plan: "Daily",
+      plan: "Daily Pass",
       status: "expired",
       dataUsed: "2.8 GB",
       joinedDate: "2024-03-05",
@@ -128,6 +201,21 @@ const TenantDashboard: React.FC = () => {
     },
   ]);
 
+  const [newPackage, setNewPackage] = useState<Omit<Package, "id" | "createdAt">>({
+    name: "",
+    description: "",
+    price: 0,
+    duration: "daily",
+    durationDays: 1,
+    dataLimit: "1GB",
+    speedLimit: "2Mbps",
+    isActive: true,
+    isPopular: false,
+    features: [],
+  });
+
+  const [featureInput, setFeatureInput] = useState("");
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -163,9 +251,107 @@ const TenantDashboard: React.FC = () => {
     }).format(amount);
   };
 
+  // Package Management Functions
+  const handleAddPackage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const packageData: Package = {
+      id: Date.now().toString(),
+      ...newPackage,
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+    setPackages([...packages, packageData]);
+    setShowAddPackage(false);
+    setNewPackage({
+      name: "",
+      description: "",
+      price: 0,
+      duration: "daily",
+      durationDays: 1,
+      dataLimit: "1GB",
+      speedLimit: "2Mbps",
+      isActive: true,
+      isPopular: false,
+      features: [],
+    });
+    setFeatureInput("");
+  };
+
+  const handleEditPackage = (pkg: Package) => {
+    setEditingPackage(pkg);
+    setNewPackage({
+      name: pkg.name,
+      description: pkg.description,
+      price: pkg.price,
+      duration: pkg.duration,
+      durationDays: pkg.durationDays,
+      dataLimit: pkg.dataLimit,
+      speedLimit: pkg.speedLimit,
+      isActive: pkg.isActive,
+      isPopular: pkg.isPopular,
+      features: pkg.features,
+    });
+    setShowAddPackage(true);
+  };
+
+  const handleUpdatePackage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPackage) return;
+    
+    const updatedPackages = packages.map(pkg => 
+      pkg.id === editingPackage.id 
+        ? { ...pkg, ...newPackage }
+        : pkg
+    );
+    setPackages(updatedPackages);
+    setShowAddPackage(false);
+    setEditingPackage(null);
+    setNewPackage({
+      name: "",
+      description: "",
+      price: 0,
+      duration: "daily",
+      durationDays: 1,
+      dataLimit: "1GB",
+      speedLimit: "2Mbps",
+      isActive: true,
+      isPopular: false,
+      features: [],
+    });
+    setFeatureInput("");
+  };
+
+  const handleDeletePackage = (id: string) => {
+    if (window.confirm("Are you sure you want to delete this package?")) {
+      setPackages(packages.filter(pkg => pkg.id !== id));
+    }
+  };
+
+  const handleTogglePackageStatus = (id: string) => {
+    setPackages(packages.map(pkg =>
+      pkg.id === id ? { ...pkg, isActive: !pkg.isActive } : pkg
+    ));
+  };
+
+  const addFeature = () => {
+    if (featureInput.trim() && !newPackage.features.includes(featureInput.trim())) {
+      setNewPackage({
+        ...newPackage,
+        features: [...newPackage.features, featureInput.trim()],
+      });
+      setFeatureInput("");
+    }
+  };
+
+  const removeFeature = (feature: string) => {
+    setNewPackage({
+      ...newPackage,
+      features: newPackage.features.filter(f => f !== feature),
+    });
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
+      {/* Sidebar - Same as before */}
       <div
         className={`${
           sidebarOpen ? "w-64" : "w-20"
@@ -173,7 +359,7 @@ const TenantDashboard: React.FC = () => {
       >
         <div className="flex items-center justify-between p-4 border-b border-green-700">
           <div className={`${sidebarOpen ? "block" : "hidden"} font-bold text-xl`}>
-            NetworkSaaS
+            AirMesh
           </div>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -189,7 +375,6 @@ const TenantDashboard: React.FC = () => {
           </button>
         </div>
 
-        {/* Business Info */}
         <div className={`p-4 border-b border-green-700 ${sidebarOpen ? "block" : "hidden"}`}>
           <p className="text-sm text-green-300">Your Business</p>
           <p className="font-semibold">Nairobi Wi-Fi Solutions</p>
@@ -209,6 +394,20 @@ const TenantDashboard: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
             <span className={sidebarOpen ? "block" : "hidden"}>Overview</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("packages")}
+            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              activeTab === "packages"
+                ? "bg-green-700 text-white"
+                : "hover:bg-green-700 text-gray-300 hover:text-white"
+            }`}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            <span className={sidebarOpen ? "block" : "hidden"}>Packages</span>
           </button>
 
           <button
@@ -306,9 +505,9 @@ const TenantDashboard: React.FC = () => {
         </header>
 
         <div className="p-6">
+          {/* Overview Tab - Same as before */}
           {activeTab === "overview" && (
             <>
-              {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
@@ -383,8 +582,7 @@ const TenantDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Quick Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-gradient-to-r from-green-600 to-green-700 p-6 rounded-xl text-white">
                   <h3 className="text-lg font-semibold mb-2">Quick Add Subscriber</h3>
                   <p className="text-green-100 mb-4">Add a new customer to your Wi-Fi network</p>
@@ -396,18 +594,27 @@ const TenantDashboard: React.FC = () => {
                   </button>
                 </div>
                 <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-xl text-white">
-                  <h3 className="text-lg font-semibold mb-2">Connect Your Router</h3>
-                  <p className="text-blue-100 mb-4">Configure your router to start selling Wi-Fi</p>
+                  <h3 className="text-lg font-semibold mb-2">Manage Packages</h3>
+                  <p className="text-blue-100 mb-4">Create and customize your Wi-Fi packages</p>
+                  <button 
+                    onClick={() => setActiveTab("packages")}
+                    className="bg-white text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                  >
+                    View Packages
+                  </button>
+                </div>
+                <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 rounded-xl text-white">
+                  <h3 className="text-lg font-semibold mb-2">Connect Router</h3>
+                  <p className="text-purple-100 mb-4">Configure your router to start selling Wi-Fi</p>
                   <button 
                     onClick={() => setActiveTab("router")}
-                    className="bg-white text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                    className="bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors"
                   >
                     Setup Router
                   </button>
                 </div>
               </div>
 
-              {/* Recent Subscribers */}
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold text-gray-800">Recent Subscribers</h2>
@@ -454,6 +661,141 @@ const TenantDashboard: React.FC = () => {
             </>
           )}
 
+          {/* Packages Tab - NEW */}
+          {activeTab === "packages" && (
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">Wi-Fi Packages</h2>
+                  <p className="text-sm text-gray-500">These packages will be displayed on your captive portal</p>
+                </div>
+                <button 
+                  onClick={() => {
+                    setEditingPackage(null);
+                    setNewPackage({
+                      name: "",
+                      description: "",
+                      price: 0,
+                      duration: "daily",
+                      durationDays: 1,
+                      dataLimit: "1GB",
+                      speedLimit: "2Mbps",
+                      isActive: true,
+                      isPopular: false,
+                      features: [],
+                    });
+                    setFeatureInput("");
+                    setShowAddPackage(true);
+                  }}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  + New Package
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {packages.map((pkg) => (
+                  <div 
+                    key={pkg.id} 
+                    className={`border rounded-xl p-6 transition-all duration-300 hover:shadow-lg ${
+                      !pkg.isActive ? "opacity-60 bg-gray-50" : 
+                      pkg.isPopular ? "border-green-500 bg-green-50" : "border-gray-200"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-800">{pkg.name}</h3>
+                        <p className="text-sm text-gray-500">{pkg.description}</p>
+                      </div>
+                      {pkg.isPopular && (
+                        <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                          Popular
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mb-4">
+                      <span className="text-3xl font-bold text-gray-800">{formatCurrency(pkg.price)}</span>
+                      <span className="text-gray-500 text-sm ml-1">
+                        / {pkg.duration}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>{pkg.durationDays} days access</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Data: {pkg.dataLimit}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Speed: {pkg.speedLimit}</span>
+                      </div>
+                      {pkg.features.slice(0, 2).map((feature, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                      {pkg.features.length > 2 && (
+                        <div className="text-sm text-gray-500">
+                          +{pkg.features.length - 2} more features
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 mt-4 pt-4 border-t">
+                      <div className="flex items-center gap-2">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={pkg.isActive}
+                            onChange={() => handleTogglePackageStatus(pkg.id)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600"></div>
+                          <span className="ml-2 text-xs text-gray-600">
+                            {pkg.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </label>
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => handleEditPackage(pkg)}
+                          className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeletePackage(pkg.id)}
+                          className="p-1 text-red-600 hover:text-red-800 transition-colors"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Subscribers Tab - Same as before with minor updates */}
           {activeTab === "subscribers" && (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -532,6 +874,7 @@ const TenantDashboard: React.FC = () => {
             </div>
           )}
 
+          {/* Transactions Tab - Same as before */}
           {activeTab === "transactions" && (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -593,6 +936,7 @@ const TenantDashboard: React.FC = () => {
             </div>
           )}
 
+          {/* Router Tab - Same as before */}
           {activeTab === "router" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white rounded-xl shadow-sm p-6">
@@ -656,6 +1000,7 @@ const TenantDashboard: React.FC = () => {
             </div>
           )}
 
+          {/* Settings Tab - Same as before */}
           {activeTab === "settings" && (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-6">Business Settings</h2>
@@ -679,33 +1024,23 @@ const TenantDashboard: React.FC = () => {
                 </div>
 
                 <div className="border-t pt-6">
-                  <h3 className="text-md font-semibold text-gray-700 mb-4">Pricing Plans</h3>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-semibold">Daily</h4>
-                        <p className="text-2xl font-bold text-green-600">Ksh 200</p>
-                        <button className="mt-2 text-sm text-green-600 hover:text-green-700">Edit</button>
-                      </div>
-                      <div className="p-4 border rounded-lg bg-green-50 border-green-200">
-                        <h4 className="font-semibold">Weekly</h4>
-                        <p className="text-2xl font-bold text-green-600">Ksh 500</p>
-                        <button className="mt-2 text-sm text-green-600 hover:text-green-700">Edit</button>
-                      </div>
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-semibold">Monthly</h4>
-                        <p className="text-2xl font-bold text-green-600">Ksh 1,500</p>
-                        <button className="mt-2 text-sm text-green-600 hover:text-green-700">Edit</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t pt-6">
                   <h3 className="text-md font-semibold text-gray-700 mb-4">M-Pesa Settings</h3>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">M-Pesa Paybill Number</label>
                     <input type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter your Paybill number" />
+                  </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h3 className="text-md font-semibold text-gray-700 mb-4">Captive Portal Settings</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Portal Theme</label>
+                    <select className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                      <option>Default (Light)</option>
+                      <option>Dark</option>
+                      <option>Modern Blue</option>
+                      <option>Custom</option>
+                    </select>
                   </div>
                 </div>
 
@@ -719,6 +1054,209 @@ const TenantDashboard: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Add/Edit Package Modal */}
+      {showAddPackage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 my-8">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-800">
+                {editingPackage ? "Edit Package" : "Create New Package"}
+              </h3>
+              <button 
+                onClick={() => {
+                  setShowAddPackage(false);
+                  setEditingPackage(null);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={editingPackage ? handleUpdatePackage : handleAddPackage} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Package Name *</label>
+                  <input
+                    type="text"
+                    value={newPackage.name}
+                    onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="e.g., Premium Monthly"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Price (KES) *</label>
+                  <input
+                    type="number"
+                    value={newPackage.price}
+                    onChange={(e) => setNewPackage({ ...newPackage, price: parseFloat(e.target.value) })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="1500"
+                    required
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <input
+                  type="text"
+                  value={newPackage.description}
+                  onChange={(e) => setNewPackage({ ...newPackage, description: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Brief description of the package"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Duration</label>
+                  <select
+                    value={newPackage.duration}
+                    onChange={(e) => {
+                      const duration = e.target.value;
+                      const durationDays = duration === "daily" ? 1 : duration === "weekly" ? 7 : duration === "monthly" ? 30 : 1;
+                      setNewPackage({ ...newPackage, duration, durationDays });
+                    }}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Duration (Days)</label>
+                  <input
+                    type="number"
+                    value={newPackage.durationDays}
+                    onChange={(e) => setNewPackage({ ...newPackage, durationDays: parseInt(e.target.value) })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="30"
+                    min="1"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Data Limit</label>
+                  <input
+                    type="text"
+                    value={newPackage.dataLimit}
+                    onChange={(e) => setNewPackage({ ...newPackage, dataLimit: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Unlimited or 5GB"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Speed Limit</label>
+                  <input
+                    type="text"
+                    value={newPackage.speedLimit}
+                    onChange={(e) => setNewPackage({ ...newPackage, speedLimit: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="10Mbps"
+                  />
+                </div>
+                <div className="flex items-end gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Features</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={featureInput}
+                        onChange={(e) => setFeatureInput(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && addFeature()}
+                        className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Add feature"
+                      />
+                      <button
+                        type="button"
+                        onClick={addFeature}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Feature Tags */}
+              {newPackage.features.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {newPackage.features.map((feature, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+                    >
+                      {feature}
+                      <button
+                        type="button"
+                        onClick={() => removeFeature(feature)}
+                        className="hover:text-red-600"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={newPackage.isActive}
+                    onChange={(e) => setNewPackage({ ...newPackage, isActive: e.target.checked })}
+                    className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                  />
+                  <span className="text-sm text-gray-700">Active</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={newPackage.isPopular}
+                    onChange={(e) => setNewPackage({ ...newPackage, isPopular: e.target.checked })}
+                    className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                  />
+                  <span className="text-sm text-gray-700">Mark as Popular</span>
+                </label>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddPackage(false);
+                    setEditingPackage(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  {editingPackage ? "Update Package" : "Create Package"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Add Subscriber Modal */}
       {showAddSubscriber && (
@@ -749,11 +1287,13 @@ const TenantDashboard: React.FC = () => {
                 <input type="tel" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="+254 700 000 000" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Plan</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Package</label>
                 <select className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                  <option>Daily - Ksh 200</option>
-                  <option>Weekly - Ksh 500</option>
-                  <option>Monthly - Ksh 1,500</option>
+                  {packages.filter(p => p.isActive).map((pkg) => (
+                    <option key={pkg.id} value={pkg.id}>
+                      {pkg.name} - {formatCurrency(pkg.price)}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="flex gap-3">

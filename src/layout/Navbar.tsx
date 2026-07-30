@@ -8,7 +8,7 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
         <a href="/" className="text-2xl font-bold text-green-600 hover:text-green-700 transition duration-300">
-          NetworkSaaS
+          AirMesh
         </a>
 
         {/* Hamburger Menu (Mobile) */}
