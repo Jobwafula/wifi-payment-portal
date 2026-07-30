@@ -1,4 +1,4 @@
-// TenantDashboard.tsx - Updated with Hourly Plans
+// TenantDashboard.tsx - Updated with Editable Settings
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -47,6 +47,34 @@ interface DashboardStats {
   pendingPayments: number;
 }
 
+interface BusinessSettings {
+  businessName: string;
+  businessEmail: string;
+  phoneNumber: string;
+  address: string;
+  website: string;
+  taxId: string;
+}
+
+interface MpesaSettings {
+  paybillNumber: string;
+  tillNumber: string;
+  consumerKey: string;
+  consumerSecret: string;
+  passkey: string;
+  isLive: boolean;
+}
+
+interface PortalSettings {
+  theme: "light" | "dark" | "modern" | "custom";
+  primaryColor: string;
+  secondaryColor: string;
+  logoUrl: string;
+  welcomeMessage: string;
+  allowGuestAccess: boolean;
+  requirePhoneVerification: boolean;
+}
+
 const TenantDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -54,7 +82,39 @@ const TenantDashboard: React.FC = () => {
   const [showAddSubscriber, setShowAddSubscriber] = useState(false);
   const [showAddPackage, setShowAddPackage] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
+  const [settingsSaved, setSettingsSaved] = useState(false);
   
+  // Business Settings State
+  const [businessSettings, setBusinessSettings] = useState<BusinessSettings>({
+    businessName: "Nairobi Wi-Fi Solutions",
+    businessEmail: "john@nairobiwifi.com",
+    phoneNumber: "+254 700 000 000",
+    address: "Nairobi, Kenya",
+    website: "www.nairobiwifi.com",
+    taxId: "KE-PIN-12345678",
+  });
+
+  // M-Pesa Settings State
+  const [mpesaSettings, setMpesaSettings] = useState<MpesaSettings>({
+    paybillNumber: "123456",
+    tillNumber: "789012",
+    consumerKey: "********************",
+    consumerSecret: "********************",
+    passkey: "********************",
+    isLive: false,
+  });
+
+  // Portal Settings State
+  const [portalSettings, setPortalSettings] = useState<PortalSettings>({
+    theme: "light",
+    primaryColor: "#16A34A",
+    secondaryColor: "#1E40AF",
+    logoUrl: "",
+    welcomeMessage: "Welcome to our Wi-Fi network! Please select a package to get started.",
+    allowGuestAccess: false,
+    requirePhoneVerification: true,
+  });
+
   // Mock data - replace with actual API calls
   const [stats, setStats] = useState<DashboardStats>({
     totalSubscribers: 342,
@@ -440,6 +500,96 @@ const TenantDashboard: React.FC = () => {
     });
   };
 
+  // Settings Management Functions
+  const handleBusinessSettingsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setBusinessSettings(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleMpesaSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target as HTMLInputElement;
+    setMpesaSettings(prev => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value
+    }));
+  };
+
+  const handlePortalSettingsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    if (type === "checkbox") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setPortalSettings(prev => ({
+        ...prev,
+        [name]: checked
+      }));
+    } else {
+      setPortalSettings(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsSaved(false);
+    
+    // Simulate API call
+    try {
+      // Replace with actual API call
+      // const response = await fetch("https://mneti.co.ke/api/tenant/settings", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+      //   },
+      //   body: JSON.stringify({ businessSettings, mpesaSettings, portalSettings }),
+      // });
+      
+      // Simulate successful save
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setSettingsSaved(true);
+      
+      // Hide success message after 5 seconds
+      setTimeout(() => setSettingsSaved(false), 5000);
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      alert("Failed to save settings. Please try again.");
+    }
+  };
+
+  // Load saved settings from localStorage on mount
+  useEffect(() => {
+    const savedBusiness = localStorage.getItem("businessSettings");
+    const savedMpesa = localStorage.getItem("mpesaSettings");
+    const savedPortal = localStorage.getItem("portalSettings");
+    
+    if (savedBusiness) {
+      try {
+        setBusinessSettings(JSON.parse(savedBusiness));
+      } catch (e) {
+        console.error("Failed to parse business settings");
+      }
+    }
+    if (savedMpesa) {
+      try {
+        setMpesaSettings(JSON.parse(savedMpesa));
+      } catch (e) {
+        console.error("Failed to parse M-Pesa settings");
+      }
+    }
+    if (savedPortal) {
+      try {
+        setPortalSettings(JSON.parse(savedPortal));
+      } catch (e) {
+        console.error("Failed to parse portal settings");
+      }
+    }
+  }, []);
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -468,7 +618,7 @@ const TenantDashboard: React.FC = () => {
 
         <div className={`p-4 border-b border-green-700 ${sidebarOpen ? "block" : "hidden"}`}>
           <p className="text-sm text-green-300">Your Business</p>
-          <p className="font-semibold">Nairobi Wi-Fi Solutions</p>
+          <p className="font-semibold">{businessSettings.businessName}</p>
           <p className="text-xs text-green-300">Pro Plan</p>
         </div>
 
@@ -580,7 +730,7 @@ const TenantDashboard: React.FC = () => {
             <h1 className="text-2xl font-semibold text-gray-800">
               {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
             </h1>
-            <p className="text-sm text-gray-500">Welcome back, John!</p>
+            <p className="text-sm text-gray-500">Welcome back, {businessSettings.businessName}!</p>
           </div>
           <div className="flex items-center space-x-4">
             <button className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
@@ -752,7 +902,7 @@ const TenantDashboard: React.FC = () => {
             </>
           )}
 
-          {/* Packages Tab - Updated with Hourly Plans */}
+          {/* Packages Tab */}
           {activeTab === "packages" && (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -772,7 +922,6 @@ const TenantDashboard: React.FC = () => {
                 </button>
               </div>
 
-              {/* Duration Filters */}
               <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                 <button className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium">
                   All
@@ -1106,62 +1255,342 @@ const TenantDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Fully Editable */}
           {activeTab === "settings" && (
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-6">Business Settings</h2>
-              <div className="space-y-6 max-w-2xl">
-                <div>
-                  <h3 className="text-md font-semibold text-gray-700 mb-4">Business Information</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
-                      <input type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" value="Nairobi Wi-Fi Solutions" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Business Email</label>
-                      <input type="email" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" value="john@nairobiwifi.com" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                      <input type="tel" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" value="+254 700 000 000" />
-                    </div>
+            <form onSubmit={handleSaveSettings} className="space-y-6">
+              {/* Success Message */}
+              {settingsSaved && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Settings saved successfully!</span>
                   </div>
                 </div>
+              )}
 
-                <div className="border-t pt-6">
-                  <h3 className="text-md font-semibold text-gray-700 mb-4">M-Pesa Settings</h3>
+              {/* Business Information */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-6">Business Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">M-Pesa Paybill Number</label>
-                    <input type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter your Paybill number" />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Business Name *</label>
+                    <input
+                      type="text"
+                      name="businessName"
+                      value={businessSettings.businessName}
+                      onChange={handleBusinessSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      required
+                    />
                   </div>
-                </div>
-
-                <div className="border-t pt-6">
-                  <h3 className="text-md font-semibold text-gray-700 mb-4">Captive Portal Settings</h3>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Portal Theme</label>
-                    <select className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                      <option>Default (Light)</option>
-                      <option>Dark</option>
-                      <option>Modern Blue</option>
-                      <option>Custom</option>
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Business Email *</label>
+                    <input
+                      type="email"
+                      name="businessEmail"
+                      value={businessSettings.businessEmail}
+                      onChange={handleBusinessSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      required
+                    />
                   </div>
-                </div>
-
-                <div className="border-t pt-6">
-                  <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold">
-                    Save Settings
-                  </button>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                    <input
+                      type="tel"
+                      name="phoneNumber"
+                      value={businessSettings.phoneNumber}
+                      onChange={handleBusinessSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Tax ID / PIN</label>
+                    <input
+                      type="text"
+                      name="taxId"
+                      value={businessSettings.taxId}
+                      onChange={handleBusinessSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Business Address</label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={businessSettings.address}
+                      onChange={handleBusinessSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Nairobi, Kenya"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                    <input
+                      type="url"
+                      name="website"
+                      value={businessSettings.website}
+                      onChange={handleBusinessSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="www.yourbusiness.com"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+
+              {/* M-Pesa Settings */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-6">M-Pesa Integration</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Paybill Number</label>
+                    <input
+                      type="text"
+                      name="paybillNumber"
+                      value={mpesaSettings.paybillNumber}
+                      onChange={handleMpesaSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="123456"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Till Number</label>
+                    <input
+                      type="text"
+                      name="tillNumber"
+                      value={mpesaSettings.tillNumber}
+                      onChange={handleMpesaSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="789012"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Consumer Key</label>
+                    <input
+                      type="password"
+                      name="consumerKey"
+                      value={mpesaSettings.consumerKey}
+                      onChange={handleMpesaSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Enter consumer key"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Consumer Secret</label>
+                    <input
+                      type="password"
+                      name="consumerSecret"
+                      value={mpesaSettings.consumerSecret}
+                      onChange={handleMpesaSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Enter consumer secret"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Passkey</label>
+                    <input
+                      type="password"
+                      name="passkey"
+                      value={mpesaSettings.passkey}
+                      onChange={handleMpesaSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Enter passkey"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="isLive"
+                        checked={mpesaSettings.isLive}
+                        onChange={handleMpesaSettingsChange}
+                        className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                      />
+                      <span className="text-sm text-gray-700">Enable Live Mode (Production)</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {mpesaSettings.isLive ? "⚠️ Live mode enabled - real transactions will be processed" : "🔧 Test mode enabled - use test credentials"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Captive Portal Settings */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-6">Captive Portal Settings</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Portal Theme</label>
+                    <select
+                      name="theme"
+                      value={portalSettings.theme}
+                      onChange={handlePortalSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                      <option value="modern">Modern Blue</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Primary Color</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        name="primaryColor"
+                        value={portalSettings.primaryColor}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setPortalSettings(prev => ({ ...prev, primaryColor: value }));
+                        }}
+                        className="w-12 h-12 rounded-lg border cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        name="primaryColor"
+                        value={portalSettings.primaryColor}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setPortalSettings(prev => ({ ...prev, primaryColor: value }));
+                        }}
+                        className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="#16A34A"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Secondary Color</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        name="secondaryColor"
+                        value={portalSettings.secondaryColor}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setPortalSettings(prev => ({ ...prev, secondaryColor: value }));
+                        }}
+                        className="w-12 h-12 rounded-lg border cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        name="secondaryColor"
+                        value={portalSettings.secondaryColor}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setPortalSettings(prev => ({ ...prev, secondaryColor: value }));
+                        }}
+                        className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="#1E40AF"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Logo URL</label>
+                    <input
+                      type="url"
+                      name="logoUrl"
+                      value={portalSettings.logoUrl}
+                      onChange={handlePortalSettingsChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="https://example.com/logo.png"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Welcome Message</label>
+                    <textarea
+                      name="welcomeMessage"
+                      value={portalSettings.welcomeMessage}
+                      onChange={handlePortalSettingsChange}
+                      rows={3}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Welcome to our Wi-Fi network..."
+                    />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="allowGuestAccess"
+                        checked={portalSettings.allowGuestAccess}
+                        onChange={handlePortalSettingsChange}
+                        className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                      />
+                      <span className="text-sm text-gray-700">Allow Guest Access</span>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="requirePhoneVerification"
+                        checked={portalSettings.requirePhoneVerification}
+                        onChange={handlePortalSettingsChange}
+                        className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                      />
+                      <span className="text-sm text-gray-700">Require Phone Verification</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Theme Preview */}
+                <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Theme Preview</p>
+                  <div className="flex items-center gap-4">
+                    <div 
+                      className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold"
+                      style={{ backgroundColor: portalSettings.primaryColor }}
+                    >
+                      A
+                    </div>
+                    <div 
+                      className="px-4 py-2 rounded-lg text-white"
+                      style={{ backgroundColor: portalSettings.secondaryColor }}
+                    >
+                      Button
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Using colors: {portalSettings.primaryColor} & {portalSettings.secondaryColor}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Reset to saved settings - reload from localStorage
+                    const savedBusiness = localStorage.getItem("businessSettings");
+                    const savedMpesa = localStorage.getItem("mpesaSettings");
+                    const savedPortal = localStorage.getItem("portalSettings");
+                    
+                    if (savedBusiness) setBusinessSettings(JSON.parse(savedBusiness));
+                    if (savedMpesa) setMpesaSettings(JSON.parse(savedMpesa));
+                    if (savedPortal) setPortalSettings(JSON.parse(savedPortal));
+                  }}
+                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Reset
+                </button>
+                <button
+                  type="submit"
+                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                >
+                  Save All Settings
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </div>
 
-      {/* Add/Edit Package Modal - Updated with Hourly Support */}
+      {/* Add/Edit Package Modal */}
       {showAddPackage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
           <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 my-8">
@@ -1305,7 +1734,6 @@ const TenantDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Feature Tags */}
               {newPackage.features.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {newPackage.features.map((feature, index) => (
@@ -1339,7 +1767,8 @@ const TenantDashboard: React.FC = () => {
                   <span className="text-sm text-gray-700">Active</span>
                 </label>
                 <label className="flex items-center gap-2">
-                  <input                    type="checkbox"
+                  <input
+                    type="checkbox"
                     checked={newPackage.isPopular}
                     onChange={(e) => setNewPackage({ ...newPackage, isPopular: e.target.checked })}
                     className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
@@ -1372,7 +1801,7 @@ const TenantDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Add Subscriber Modal - Updated with Hourly Packages */}
+      {/* Add Subscriber Modal */}
       {showAddSubscriber && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
